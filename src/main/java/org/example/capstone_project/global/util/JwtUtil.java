@@ -12,12 +12,12 @@ import java.util.Date;
 @Component // required를 쓰기위해서 autowired도 똑같음
 //토큰 생성 및 유효성 검사
 public class JwtUtil {
-    private static final String SECRET = "your-secret-key-your-secret-key";
+    private static final String SECRET = "your-secret-key-your-secret-key-123456";
     private static final long EXP = 1000L * 60 * 60 * 24 * 30; // 30일 (밀리초 단위)
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
     //토큰 생성 메서드
-    private String generateToken(String nickname) {
+    public String generateToken(String nickname) {
         long now = System.currentTimeMillis(); // 현재 시간
         Date issuedAt = new Date(now);
         Date expiration = new Date(now + EXP); // 30일 후 만료
@@ -34,7 +34,7 @@ public class JwtUtil {
         return Jwts.parserBuilder()
                 .setSigningKey(key) //검증키
                 .build()
-                .parseClaimsJwt(token) //토큰 분석
+                .parseClaimsJws(token) //토큰 분석
                 .getBody()
                 .getSubject(); // 다시 토큰에서 닉네임 추출
     }
