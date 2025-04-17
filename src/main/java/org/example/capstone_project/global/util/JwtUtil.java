@@ -13,7 +13,7 @@ import java.util.Date;
 //토큰 생성 및 유효성 검사
 public class JwtUtil {
     private static final String SECRET = "your-secret-key-your-secret-key-123456";
-    private static final long EXP = 1000L * 60 * 60 * 24 * 30; // 30일 (밀리초 단위)
+    private static final long EXP = 1000L * 60 * 60 * 24 ; // 30일 (밀리초 단위)
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
     //토큰 생성 메서드
@@ -47,6 +47,17 @@ public class JwtUtil {
         } catch (JwtException e) {
             return false; // 서명 위조, 만료, 형식 오류 등 체크 처리
         }
+    }
+    private static final long REFRESH_EXP = 1000L * 60 * 60 * 24 * 14; // 2주
+
+    // 리프레시 토큰 생성
+    public String generateRefreshToken(String nickname) {
+        return Jwts.builder()
+                .setSubject(nickname)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_EXP))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 
 

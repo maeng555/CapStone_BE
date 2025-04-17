@@ -22,6 +22,11 @@ public class User {
     private int age;
     @Column(nullable = false)
     private String password;
+    @Column(length = 500)
+    private String refreshToken;
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 
 
 

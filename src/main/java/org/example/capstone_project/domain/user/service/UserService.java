@@ -23,7 +23,7 @@ public class UserService {
             throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
         }
         System.out.println("📌 register: DB 저장 시도 중"); // 로그
-        User user = new User(null, request.getNickname(), request.getAge(), passwordEncoder.encode(request.getPassword()));
+        User user = new User(null, request.getNickname(), request.getAge(), passwordEncoder.encode(request.getPassword()),null);
         userRepository.save(user);
     }
 
@@ -33,7 +33,36 @@ public class UserService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호 일치하지 않습니다");
         }
-        String token = jwtUtil.generateToken(user.getNickname());
-        return new LoginResponse(token);
+
+        String accessToken = jwtUtil.generateToken(user.getNickname());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getNickname());
+
+        user.updateRefreshToken(refreshToken); // ← setter 또는 별도 메서드로
+        userRepository.save(user);
+
+
+        return new LoginResponse(accessToken, refreshToken);
+    }
+
+    public LoginResponse reissue(String refreshToken) {
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다.");
+        }
+
+        String nickname = jwtUtil.getNickname(refreshToken);
+        User user = userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        if (!refreshToken.equals(user.getRefreshToken())) {
+            throw new IllegalArgumentException("토큰이 일치하지 않습니다.");
+        }
+
+        String newAccessToken = jwtUtil.generateToken(nickname);
+        String newRefreshToken = jwtUtil.generateRefreshToken(nickname);
+
+        user.updateRefreshToken(newRefreshToken);
+        userRepository.save(user);
+
+        return new LoginResponse(newAccessToken, newRefreshToken);
     }
 }
