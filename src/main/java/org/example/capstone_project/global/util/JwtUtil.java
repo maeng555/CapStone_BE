@@ -48,7 +48,7 @@ public class JwtUtil {
             return false; // 서명 위조, 만료, 형식 오류 등 체크 처리
         }
     }
-    private static final long REFRESH_EXP = 1000L * 60 * 60 * 24 * 14; // 2주
+    private static final long REFRESH_EXP = 1000L * 60 * 60 * 24 * 14;
 
     // 리프레시 토큰 생성
     public String generateRefreshToken(String nickname) {
