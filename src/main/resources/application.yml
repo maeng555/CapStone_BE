@@ -24,6 +24,7 @@ spring:
       max-request-size: 50MB
       location: ${java.io.tmpdir}
 
+
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}  # .env ?? ????? ?? ??
