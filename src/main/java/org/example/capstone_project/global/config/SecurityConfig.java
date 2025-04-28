@@ -51,7 +51,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/webjars/**"
                         ).permitAll()
-                        .requestMatchers("/api/auth/**","/api/odsay/transit").permitAll()
+                        .requestMatchers("/api/auth/**","/api/odsay/transit","/api/tmap/transit").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
