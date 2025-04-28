@@ -3,7 +3,6 @@ package org.example.capstone_project.domain.map.controller;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.example.capstone_project.domain.map.dto.TransitCategoryResponse;
 import org.example.capstone_project.domain.map.service.TmapDirectionService;
 import org.example.capstone_project.domain.map.service.TransitProcessingService;

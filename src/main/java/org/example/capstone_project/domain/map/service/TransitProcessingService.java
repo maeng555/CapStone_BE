@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone_project.domain.map.dto.TransitCategoryResponse;
+import org.example.capstone_project.domain.map.dto.TransitLegResponse;
+import org.example.capstone_project.domain.map.dto.TransitPathResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -17,96 +19,100 @@ public class TransitProcessingService {
 
     public TransitCategoryResponse process(String tmapResponseJson) {
         try {
-            // JSON 파싱
             JsonNode root = objectMapper.readTree(tmapResponseJson);
-            JsonNode itinerariesNode = root
-                    .path("metaData")
-                    .path("plan")
-                    .path("itineraries");
+            JsonNode itinerariesNode = root.path("metaData").path("plan").path("itineraries");
 
-            // itineraries가 아예 없거나 비어있을 때 방어
             if (itinerariesNode.isMissingNode() || !itinerariesNode.isArray() || itinerariesNode.isEmpty()) {
                 throw new IllegalArgumentException("Tmap 응답에 경로 정보(itineraries)가 없습니다.");
             }
 
-            List<Map<String, Object>> itineraryList = objectMapper.convertValue(
-                    itinerariesNode,
-                    List.class
-            );
+            // 수정: 여기서 빈 리스트 만들어
+            List<TransitPathResponse> paths = new ArrayList<>();
 
-            // 추천 (전체)
-            List<Map<String, Object>> recommended = itineraryList.stream()
-                    .limit(3)
-                    .collect(Collectors.toList());
-            // 지하철만
-            List<Map<String, Object>> subwayOnly = itineraryList.stream()
-                    .filter(this::isSubwayOnly)
-                    .limit(3)
-                    .collect(Collectors.toList());
+            for (JsonNode itinerary : itinerariesNode) {
+                List<TransitLegResponse> legs = new ArrayList<>();
+                int totalWalkDistance = 0;
+                int totalTime = 0;
 
-            // 버스만
-            List<Map<String, Object>> busOnly = itineraryList.stream()
-                    .filter(this::isBusOnly)
-                    .limit(3)
-                    .collect(Collectors.toList());
+                for (JsonNode leg : itinerary.path("legs")) {
+                    String mode = leg.path("mode").asText();
+                    String route = leg.path("route").isMissingNode() ? null : leg.path("route").asText();
+                    int sectionTime = leg.path("sectionTime").asInt();
+                    int distance = leg.path("distance").asInt();
+                    String startName = leg.path("start").path("name").asText();
+                    String endName = leg.path("end").path("name").asText();
 
-            // 최소 환승
-            Map<String, Object> minTransfer = itineraryList.stream()
-                    .filter(itinerary -> itinerary.get("transferCount") != null)
-                    .min(Comparator.comparingInt(itinerary -> (int) itinerary.get("transferCount")))
-                    .orElse(null);
+                    List<String> stations = null;
+                    Integer stationCount = null;
+                    List<String> descriptions = null;
 
-            // 최소 요금
-            Map<String, Object> minFare = itineraryList.stream()
-                    .filter(itinerary -> getTotalFare(itinerary) != null)
-                    .min(Comparator.comparingInt(this::getTotalFare))
-                    .orElse(null);
+                    if (mode.equals("SUBWAY") || mode.equals("BUS")) {
+                        JsonNode stationList = leg.path("passStopList").path("stationList");
+                        if (stationList.isArray()) {
+                            stations = new ArrayList<>();
+                            for (JsonNode station : stationList) {
+                                stations.add(station.path("stationName").asText());
+                            }
+                            stationCount = stations.size();
+                        }
+                    }
 
-            // 최소 소요시간
-            Map<String, Object> minTime = itineraryList.stream()
-                    .filter(itinerary -> itinerary.get("totalTime") != null)
-                    .min(Comparator.comparingInt(itinerary -> (int) itinerary.get("totalTime")))
-                    .orElse(null);
+                    if (mode.equals("WALK")) {
+                        JsonNode steps = leg.path("steps");
+                        if (steps.isArray()) {
+                            descriptions = new ArrayList<>();
+                            for (JsonNode step : steps) {
+                                descriptions.add(step.path("description").asText());
+                            }
+                        }
+                        totalWalkDistance += distance;
+                    }
+
+                    totalTime += sectionTime;
+
+                    legs.add(TransitLegResponse.builder()
+                            .mode(mode)
+                            .route(route)
+                            .sectionTime(sectionTime)
+                            .distance(distance)
+                            .startName(startName)
+                            .endName(endName)
+                            .stations(stations)
+                            .stationCount(stationCount)
+                            .descriptions(descriptions)
+                            .build());
+                }
+
+                paths.add(TransitPathResponse.builder()
+                        .legs(legs)
+                        .totalWalkDistance(totalWalkDistance)
+                        .totalTime(totalTime)
+                        .build());
+            }
 
             return TransitCategoryResponse.builder()
-                    .recommended(recommended)
-                    .subwayOnly(subwayOnly)
-                    .busOnly(busOnly)
-                    .minTransfer(minTransfer)
-                    .minFare(minFare)
-                    .minTime(minTime)
+                    .recommended(paths.stream().limit(3).collect(Collectors.toList()))
+                    .subwayOnly(paths.stream().filter(this::isSubwayOnly).limit(3).collect(Collectors.toList()))
+                    .busOnly(paths.stream().filter(this::isBusOnly).limit(3).collect(Collectors.toList()))
+                    .minTransfer(paths.stream().min(Comparator.comparingInt(p -> p.getLegs().size())).orElse(null))
+                    .minFare(paths.get(0)) // 가장 첫 번째가 요금 제일 적은 경로
+                    .minTime(paths.stream().min(Comparator.comparingInt(TransitPathResponse::getTotalTime)).orElse(null))
                     .build();
 
         } catch (IllegalArgumentException e) {
-            throw e; // 직접 던진 것은 그대로
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("길찾기 데이터 파싱 실패", e);
         }
     }
 
-    // ✨ "totalFare" 꺼내는 보조 함수
-    private Integer getTotalFare(Map<String, Object> itinerary) {
-        try {
-            Map<String, Object> fare = (Map<String, Object>) itinerary.get("fare");
-            Map<String, Object> regular = (Map<String, Object>) fare.get("regular");
-            return (Integer) regular.get("totalFare");
-        } catch (Exception e) {
-            return null;
-        }
+    private boolean isSubwayOnly(TransitPathResponse path) {
+        return path.getLegs().stream()
+                .allMatch(leg -> leg.getMode().equals("SUBWAY") || leg.getMode().equals("WALK"));
     }
 
-    // 🚀 수정한 부분: "WALK"은 허용
-    private boolean isSubwayOnly(Map<String, Object> itinerary) {
-        List<Map<String, Object>> legs = (List<Map<String, Object>>) itinerary.get("legs");
-        return legs.stream().allMatch(leg ->
-                "SUBWAY".equals(leg.get("mode")) || "WALK".equals(leg.get("mode"))
-        );
-    }
-
-    private boolean isBusOnly(Map<String, Object> itinerary) {
-        List<Map<String, Object>> legs = (List<Map<String, Object>>) itinerary.get("legs");
-        return legs.stream().allMatch(leg ->
-                "BUS".equals(leg.get("mode")) || "WALK".equals(leg.get("mode"))
-        );
+    private boolean isBusOnly(TransitPathResponse path) {
+        return path.getLegs().stream()
+                .allMatch(leg -> leg.getMode().equals("BUS") || leg.getMode().equals("WALK"));
     }
 }
