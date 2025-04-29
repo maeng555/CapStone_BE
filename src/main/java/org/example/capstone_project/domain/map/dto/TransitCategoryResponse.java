@@ -12,10 +12,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class TransitCategoryResponse {
-    private List<TransitPathResponse> recommended;  // ✅ 수정
-    private List<TransitPathResponse> subwayOnly;   // ✅ 수정
-    private List<TransitPathResponse> busOnly;      // ✅ 수정
-    private TransitPathResponse minTransfer;        // ✅ 수정
-    private TransitPathResponse minFare;            // ✅ 수정
-    private TransitPathResponse minTime;            // ✅ 수정
+    private List<TransitPathResponse> recommended;
+    private List<TransitPathResponse> subwayOnly;
+    private List<TransitPathResponse> busOnly;
+    private TransitPathResponse minTransfer;
+    private TransitPathResponse minFare;
+    private TransitPathResponse minTime;
 }
