@@ -17,7 +17,7 @@ public class AiRecommendationService {
             사용자의 현재 위치는 "%s"입니다.
             근처에서 인기 있는 음식점 3곳을 추천해 주세요.
             - 한 줄 설명 포함
-            - 메뉴 예시 간단히 포함
+            - 메뉴 예시 간단히 포함 해주세요
         """, location);
 
         return chatClient.prompt()
