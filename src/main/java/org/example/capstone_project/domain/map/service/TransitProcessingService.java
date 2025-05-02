@@ -23,7 +23,7 @@ public class TransitProcessingService {
             JsonNode itinerariesNode = root.path("metaData").path("plan").path("itineraries");
 
             if (itinerariesNode.isMissingNode() || !itinerariesNode.isArray() || itinerariesNode.isEmpty()) {
-                throw new IllegalArgumentException("Tmap 응답에 경로 정보(itineraries)가 없습니다.");
+                throw new IllegalArgumentException("Tmap 응답에 경로 정보가 없습니다.");
             }
 
             // 수정: 여기서 빈 리스트 만들어
