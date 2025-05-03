@@ -16,7 +16,7 @@ public class OdsayDirectionController {
 
     @GetMapping("/transit")
     public String getTransitRoute(
-            @RequestParam double startX,//dkssuds
+            @RequestParam double startX,
             @RequestParam double startY,
             @RequestParam double goalX,
             @RequestParam double goalY
