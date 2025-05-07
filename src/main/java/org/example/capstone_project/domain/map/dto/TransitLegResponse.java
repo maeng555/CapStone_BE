@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class TransitLegResponse {
     private String mode; // walk, bus, subway
     private String route; //노선

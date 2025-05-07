@@ -17,7 +17,7 @@ public class TransitProcessingService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public TransitCategoryResponse process(String tmapResponseJson) {
+    public TransitCategoryResponse process(String tmapResponseJson, String startNameOverride, String endNameOverride) {
         try {
             JsonNode root = objectMapper.readTree(tmapResponseJson);
             JsonNode itinerariesNode = root.path("metaData").path("plan").path("itineraries");
@@ -81,6 +81,12 @@ public class TransitProcessingService {
                             .stationCount(stationCount)
                             .descriptions(descriptions)
                             .build());
+                }
+                if (!legs.isEmpty()) {
+                    TransitLegResponse first = legs.get(0).toBuilder().startName(startNameOverride).build();
+                    TransitLegResponse last = legs.get(legs.size() - 1).toBuilder().endName(endNameOverride).build();
+                    legs.set(0, first);
+                    legs.set(legs.size() - 1, last);
                 }
 
                 paths.add(TransitPathResponse.builder()
