@@ -47,7 +47,7 @@ public class TmapDirectionService {
                 String.class
         ).getBody();
     }
-    private String getAddressName(double lat, double lon) {
+    public String getAddressName(double lat, double lon) {
         String url = TMAP_REVERSE_GEO_URL + "&lat=" + lat + "&lon=" + lon;
 
         HttpHeaders headers = new HttpHeaders();
@@ -57,7 +57,7 @@ public class TmapDirectionService {
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
             JsonNode root = objectMapper.readTree(response.getBody());
-            return root.path("addressInfo").path("buildingName").asText(); // or "buildingName"
+            return root.path("addressInfo").path("buildingName").asText();
         } catch (Exception e) {
             return "위치"; // fallback
         }
