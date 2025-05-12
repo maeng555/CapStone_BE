@@ -37,8 +37,8 @@ public class SecurityConfig {
         http
                 .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
-                .formLogin(form -> form.disable())  // ⛔ 기본 로그인 폼 비활성화
-                .httpBasic(basic -> basic.disable())// ⛔ 기본 HTTP Basic 인증도 비활성화
+                .formLogin(form -> form.disable())  // 기본 로그인 폼 비활성화
+                .httpBasic(basic -> basic.disable()) // 기본 HTTP Basic 인증도 비활성화
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))//세션 사용안
                 .authorizeHttpRequests(auth -> auth
