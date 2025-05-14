@@ -10,9 +10,12 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class TransitPathResponse {
     private List<TransitLegResponse> legs;
     private int totalWalkDistance;
     private int totalTime;
+
+    private String departureTime;
+    private String arrivalTime;
 }
