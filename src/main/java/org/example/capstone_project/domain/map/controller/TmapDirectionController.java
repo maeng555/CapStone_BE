@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone_project.domain.map.dto.TransitCategoryResponse;
 import org.example.capstone_project.domain.map.dto.TransitPathResponse;
+import org.example.capstone_project.domain.map.service.BusRealtimeService;
 import org.example.capstone_project.domain.map.service.TmapDirectionService;
 import org.example.capstone_project.domain.map.service.TransitFilterService;
 import org.example.capstone_project.domain.map.service.TransitProcessingService;
@@ -23,6 +24,7 @@ public class TmapDirectionController {
     private final TmapDirectionService tmapDirectionService;
     private final TransitProcessingService transitProcessingService;
     private final TransitFilterService transitFilterService;
+    private final BusRealtimeService busRealtimeService;
 
     // tmap api 모든내용
     @GetMapping("/transit")
@@ -48,6 +50,13 @@ public class TmapDirectionController {
 
         TransitCategoryResponse result = transitProcessingService.process(tmapResponse, startName, endName);
         return ResponseEntity.ok(result).getBody();
+    }
+    @GetMapping("/transit/realtime")
+    public String getBusArrival(
+            @RequestParam String stationId,
+            @RequestParam String routeId
+    ) {
+        return busRealtimeService.getRealtimeArrival(stationId, routeId);
     }
     @GetMapping("/transit/preferred")
     public ResponseEntity<List<TransitPathResponse>> getPreferredTransitRoute(
