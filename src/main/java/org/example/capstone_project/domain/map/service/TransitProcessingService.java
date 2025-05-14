@@ -1,5 +1,7 @@
 package org.example.capstone_project.domain.map.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 public class TransitProcessingService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
 
     public TransitCategoryResponse process(String tmapResponseJson, String startNameOverride, String endNameOverride) {
         try {
@@ -82,6 +85,9 @@ public class TransitProcessingService {
                             .descriptions(descriptions)
                             .build());
                 }
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime arrival = now.plusSeconds(totalTime);
+
                 if (!legs.isEmpty()) {
                     TransitLegResponse first = legs.get(0).toBuilder().startName(startNameOverride).build();
                     TransitLegResponse last = legs.get(legs.size() - 1).toBuilder().endName(endNameOverride).build();
@@ -93,6 +99,8 @@ public class TransitProcessingService {
                         .legs(legs)
                         .totalWalkDistance(totalWalkDistance)
                         .totalTime(totalTime)
+                        .departureTime(now.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                        .arrivalTime(arrival.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                         .build());
             }
 
