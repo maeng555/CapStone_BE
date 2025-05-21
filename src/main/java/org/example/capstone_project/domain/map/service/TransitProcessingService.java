@@ -18,18 +18,17 @@ import java.util.stream.Collectors;
 public class TransitProcessingService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-
+    private final BusRealtimeService busRealtimeService;
 
     public TransitCategoryResponse process(String tmapResponseJson, String startNameOverride, String endNameOverride) {
         try {
             JsonNode root = objectMapper.readTree(tmapResponseJson);
             JsonNode itinerariesNode = root.path("metaData").path("plan").path("itineraries");
 
-            if (itinerariesNode.isMissingNode() || !itinerariesNode.isArray() || itinerariesNode.isEmpty()) {
+            if (!itinerariesNode.isArray() || itinerariesNode.isEmpty()) {
                 throw new IllegalArgumentException("Tmap 응답에 경로 정보가 없습니다.");
             }
 
-            // 수정: 여기서 빈 리스트 만들어
             List<TransitPathResponse> paths = new ArrayList<>();
 
             for (JsonNode itinerary : itinerariesNode) {
@@ -39,7 +38,7 @@ public class TransitProcessingService {
 
                 for (JsonNode leg : itinerary.path("legs")) {
                     String mode = leg.path("mode").asText();
-                    String route = leg.path("route").isMissingNode() ? null : leg.path("route").asText();
+                    String route = leg.path("route").asText(null);
                     int sectionTime = leg.path("sectionTime").asInt();
                     int distance = leg.path("distance").asInt();
                     String startName = leg.path("start").path("name").asText();
@@ -49,6 +48,10 @@ public class TransitProcessingService {
                     Integer stationCount = null;
                     List<String> descriptions = null;
 
+                    String stationId = null;
+                    String routeId = null;
+                    String predictTime = null;
+
                     if (mode.equals("SUBWAY") || mode.equals("BUS")) {
                         JsonNode stationList = leg.path("passStopList").path("stationList");
                         if (stationList.isArray()) {
@@ -57,6 +60,20 @@ public class TransitProcessingService {
                                 stations.add(station.path("stationName").asText());
                             }
                             stationCount = stations.size();
+
+                            // ✅ 수정: BUS의 실시간 정보용 ID 추출 (stationList[0].stationID)
+                            if (mode.equals("BUS") && stationList.size() > 0) {
+                                stationId = stationList.get(0).path("stationID").asText(null);
+                            }
+                        }
+
+                        // ✅ 수정: routeId는 leg.path("routeId")로 추출
+                        if (mode.equals("BUS")) {
+                            routeId = leg.path("routeId").asText(null);
+
+                            if (stationId != null && routeId != null) {
+                                predictTime = busRealtimeService.getRealtimeArrival(stationId, routeId);
+                            }
                         }
                     }
 
@@ -83,8 +100,12 @@ public class TransitProcessingService {
                             .stations(stations)
                             .stationCount(stationCount)
                             .descriptions(descriptions)
+                            .stationId(stationId)
+                            .routeId(routeId)
+                            .predictTime(predictTime)
                             .build());
                 }
+
                 LocalDateTime now = LocalDateTime.now();
                 LocalDateTime arrival = now.plusSeconds(totalTime);
 
@@ -109,24 +130,20 @@ public class TransitProcessingService {
                     .subwayOnly(paths.stream().filter(this::isSubwayOnly).limit(3).collect(Collectors.toList()))
                     .busOnly(paths.stream().filter(this::isBusOnly).limit(3).collect(Collectors.toList()))
                     .minTransfer(paths.stream().min(Comparator.comparingInt(p -> p.getLegs().size())).orElse(null))
-                    .minFare(paths.get(0)) // 가장 첫 번째가 요금 제일 적은 경로
+                    .minFare(paths.get(0))
                     .minTime(paths.stream().min(Comparator.comparingInt(TransitPathResponse::getTotalTime)).orElse(null))
                     .build();
 
-        } catch (IllegalArgumentException e) {
-            throw e;
         } catch (Exception e) {
             throw new RuntimeException("길찾기 데이터 파싱 실패", e);
         }
     }
 
     private boolean isSubwayOnly(TransitPathResponse path) {
-        return path.getLegs().stream()
-                .allMatch(leg -> leg.getMode().equals("SUBWAY") || leg.getMode().equals("WALK"));
+        return path.getLegs().stream().allMatch(leg -> leg.getMode().equals("SUBWAY") || leg.getMode().equals("WALK"));
     }
 
     private boolean isBusOnly(TransitPathResponse path) {
-        return path.getLegs().stream()
-                .allMatch(leg -> leg.getMode().equals("BUS") || leg.getMode().equals("WALK"));
+        return path.getLegs().stream().allMatch(leg -> leg.getMode().equals("BUS") || leg.getMode().equals("WALK"));
     }
 }

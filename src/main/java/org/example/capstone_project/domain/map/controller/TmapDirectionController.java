@@ -51,13 +51,7 @@ public class TmapDirectionController {
         TransitCategoryResponse result = transitProcessingService.process(tmapResponse, startName, endName);
         return ResponseEntity.ok(result).getBody();
     }
-    @GetMapping("/transit/realtime")
-    public String getBusArrival(
-            @RequestParam String stationId,
-            @RequestParam String routeId
-    ) {
-        return busRealtimeService.getRealtimeArrival(stationId, routeId);
-    }
+
     @GetMapping("/transit/preferred")
     public ResponseEntity<List<TransitPathResponse>> getPreferredTransitRoute(
             @RequestParam @NotNull @DecimalMin("0.0") double startX,
@@ -74,6 +68,8 @@ public class TmapDirectionController {
         List<TransitPathResponse> filtered = transitFilterService.filterByPreference(categoryResult, preferred);
         return ResponseEntity.ok(filtered);
     }
+
+
 
 
 }
