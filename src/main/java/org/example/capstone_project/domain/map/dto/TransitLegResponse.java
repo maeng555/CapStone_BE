@@ -24,5 +24,5 @@ public class TransitLegResponse {
 
     private String stationId;   // 시작 정류장 ID
     private String routeId;     // 노선 ID
-    private String predictTime; // 몇 분 후 도착
+    private String predictTime; // 몇 분 후 도착 - tmap 지원 이 안되서 빼기
 }
