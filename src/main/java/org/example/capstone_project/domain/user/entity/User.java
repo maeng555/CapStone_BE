@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.capstone_project.domain.preference.entity.UserCategoryPreference;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -28,7 +32,8 @@ public class User {
         this.refreshToken = refreshToken;
     }
 
-
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCategoryPreference> preferences = new ArrayList<>();
 
 
 }
