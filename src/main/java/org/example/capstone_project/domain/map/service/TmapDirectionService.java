@@ -20,7 +20,6 @@ public class TmapDirectionService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
-
     public String findTransitRoute(double startX, double startY, double endX, double endY) {
         String startName = getAddressName(startY, startX); // 위도, 경도 순서 주의
         String endName = getAddressName(endY, endX);

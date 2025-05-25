@@ -12,10 +12,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class TransitPathResponse {
-    private List<TransitLegResponse> legs;
-    private int totalWalkDistance;
-    private int totalTime;
+    private List<TransitLegResponse> legs; // 교통구간 별 리스트
+    private int totalWalkDistance; //총 걷기 거리
+    private int totalTime; // 총시간
 
-    private String departureTime;
-    private String arrivalTime;
+    private String departureTime; //시작 시간
+    private String arrivalTime; //도착시간
 }
