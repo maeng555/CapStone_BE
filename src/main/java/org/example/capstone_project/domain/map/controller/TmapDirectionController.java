@@ -57,24 +57,7 @@ public class TmapDirectionController {
         TransitCategoryResponse result = transitProcessingService.process(tmapResponse, startName, endName);
         return ResponseEntity.ok(result).getBody();
     }
-
-    /**
-     * @GetMapping("/transit/preferred") public ResponseEntity<List<TransitPathResponse>> getPreferredTransitRoute(
-     * @RequestParam @NotNull @DecimalMin("0.0") double startX,
-     * @RequestParam @NotNull @DecimalMin("0.0") double startY,
-     * @RequestParam @NotNull @DecimalMin("0.0") double endX,
-     * @RequestParam @NotNull @DecimalMin("0.0") double endY,
-     * @RequestParam @NotNull String preferred)
-     * {
-     * String tmapResponse = tmapDirectionService.findTransitRoute(startX, startY, endX, endY);
-     * String startName = tmapDirectionService.getAddressName(startY, startX);
-     * String endName = tmapDirectionService.getAddressName(endY, endX);
-     * <p>
-     * TransitCategoryResponse categoryResult = transitProcessingService.process(tmapResponse, startName, endName);
-     * List<TransitPathResponse> filtered = transitFilterService.filterByPreference(categoryResult, preferred);
-     * return ResponseEntity.ok(filtered);
-     * }
-     **/
+    //선호도 화면에서 클릭 횟수 증가 및 선호도 선택한 경로 보여주기
     @PostMapping("/transit/preferred/click")
     public ResponseEntity<List<TransitPathResponse>> handleCategoryClickAndGetRoute(
             @RequestHeader("Authorization") String token,
@@ -96,7 +79,7 @@ public class TmapDirectionController {
 
         return ResponseEntity.ok(filtered);
     }
-
+    //자동으로 3회햇을경우 목적지입력했을때 바로 자동화 경로화면 렌더링
     @GetMapping("/transit/auto")
     public ResponseEntity<List<TransitPathResponse>> getAutoPreferredRoute(
             @RequestHeader("Authorization") String token,

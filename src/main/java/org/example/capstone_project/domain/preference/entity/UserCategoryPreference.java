@@ -21,6 +21,7 @@ public class UserCategoryPreference {
     @Column(nullable = false)
     private String categoryName;
 
+    @Setter
     @Column(nullable = false)
     private int clickCount;
 

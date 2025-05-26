@@ -8,6 +8,7 @@ import org.example.capstone_project.domain.user.service.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +25,18 @@ public class UserCategoryPreferenceService {
                         .clickCount(0)
                         .build()); //없으면 객체 생성
         preference.increaseClickCount();
+        if (preference.getClickCount() >= 3) {
+            // 같은 사용자에 대해 3 이상 카테고리가 있다면, 그 중 '최근 갱신된' 것만 유지하고 나머지는 초기화
+            List<UserCategoryPreference> allPrefs = userCategoryPreferenceRepository.findByUser(user);
+
+            for (UserCategoryPreference p : allPrefs) {
+                if (!p.getCategoryName().equals(categoryName)) {
+                    p.setClickCount(0);
+                    userCategoryPreferenceRepository.save(p);
+                }
+            }
+        }
+
         userCategoryPreferenceRepository.save(preference);
     }
     public String getAutoSelectedCategory(User user) {
