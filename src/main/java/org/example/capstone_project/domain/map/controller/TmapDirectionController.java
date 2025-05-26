@@ -9,6 +9,9 @@ import org.example.capstone_project.domain.map.service.BusRealtimeService;
 import org.example.capstone_project.domain.map.service.TmapDirectionService;
 import org.example.capstone_project.domain.map.service.TransitFilterService;
 import org.example.capstone_project.domain.map.service.TransitProcessingService;
+import org.example.capstone_project.domain.preference.service.UserCategoryPreferenceService;
+import org.example.capstone_project.domain.user.entity.User;
+import org.example.capstone_project.domain.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +28,8 @@ public class TmapDirectionController {
     private final TransitProcessingService transitProcessingService;
     private final TransitFilterService transitFilterService;
     private final BusRealtimeService busRealtimeService;
+    private final UserCategoryPreferenceService preferenceService;
+    private final UserService userService;
 
     // tmap api 모든내용
     @GetMapping("/transit")
@@ -36,6 +41,7 @@ public class TmapDirectionController {
     ) {
         return tmapDirectionService.findTransitRoute(startX, startY, endX, endY);
     }
+
     //전체 분류 보여주기
     @GetMapping("/transit/filter")
     public TransitCategoryResponse getFilteredTransitRoute(
@@ -52,24 +58,69 @@ public class TmapDirectionController {
         return ResponseEntity.ok(result).getBody();
     }
 
-    @GetMapping("/transit/preferred")
-    public ResponseEntity<List<TransitPathResponse>> getPreferredTransitRoute(
+    /**
+     * @GetMapping("/transit/preferred") public ResponseEntity<List<TransitPathResponse>> getPreferredTransitRoute(
+     * @RequestParam @NotNull @DecimalMin("0.0") double startX,
+     * @RequestParam @NotNull @DecimalMin("0.0") double startY,
+     * @RequestParam @NotNull @DecimalMin("0.0") double endX,
+     * @RequestParam @NotNull @DecimalMin("0.0") double endY,
+     * @RequestParam @NotNull String preferred)
+     * {
+     * String tmapResponse = tmapDirectionService.findTransitRoute(startX, startY, endX, endY);
+     * String startName = tmapDirectionService.getAddressName(startY, startX);
+     * String endName = tmapDirectionService.getAddressName(endY, endX);
+     * <p>
+     * TransitCategoryResponse categoryResult = transitProcessingService.process(tmapResponse, startName, endName);
+     * List<TransitPathResponse> filtered = transitFilterService.filterByPreference(categoryResult, preferred);
+     * return ResponseEntity.ok(filtered);
+     * }
+     **/
+    @PostMapping("/transit/preferred/click")
+    public ResponseEntity<List<TransitPathResponse>> handleCategoryClickAndGetRoute(
+            @RequestHeader("Authorization") String token,
             @RequestParam @NotNull @DecimalMin("0.0") double startX,
             @RequestParam @NotNull @DecimalMin("0.0") double startY,
             @RequestParam @NotNull @DecimalMin("0.0") double endX,
             @RequestParam @NotNull @DecimalMin("0.0") double endY,
-            @RequestParam @NotNull String preferred)
-    {
+            @RequestParam @NotNull String preferred
+    ) {
+        String pureToken = token.replace("Bearer ", "");
+        User user = userService.getUserFromToken(pureToken);
+        preferenceService.increaseClickCount(user, preferred);
+
         String tmapResponse = tmapDirectionService.findTransitRoute(startX, startY, endX, endY);
         String startName = tmapDirectionService.getAddressName(startY, startX);
         String endName = tmapDirectionService.getAddressName(endY, endX);
-
         TransitCategoryResponse categoryResult = transitProcessingService.process(tmapResponse, startName, endName);
         List<TransitPathResponse> filtered = transitFilterService.filterByPreference(categoryResult, preferred);
+
         return ResponseEntity.ok(filtered);
     }
 
+    @GetMapping("/transit/auto")
+    public ResponseEntity<List<TransitPathResponse>> getAutoPreferredRoute(
+            @RequestHeader("Authorization") String token,
+            @RequestParam @NotNull @DecimalMin("0.0") double startX,
+            @RequestParam @NotNull @DecimalMin("0.0") double startY,
+            @RequestParam @NotNull @DecimalMin("0.0") double endX,
+            @RequestParam @NotNull @DecimalMin("0.0") double endY
+    ) {
+        String pureToken = token.replace("Bearer ", "");
+        User user = userService.getUserFromToken(pureToken);
 
+        String preferred = preferenceService.getAutoSelectedCategory(user);
+        if (preferred == null) {
+            return ResponseEntity.noContent().build();
+        }
+
+        String tmapResponse = tmapDirectionService.findTransitRoute(startX, startY, endX, endY);
+        String startName = tmapDirectionService.getAddressName(startY, startX);
+        String endName = tmapDirectionService.getAddressName(endY, endX);
+        TransitCategoryResponse categoryResult = transitProcessingService.process(tmapResponse, startName, endName);
+        List<TransitPathResponse> filtered = transitFilterService.filterByPreference(categoryResult, preferred);
+
+        return ResponseEntity.ok(filtered);
+    }
 
 
 }
