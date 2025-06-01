@@ -51,8 +51,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/webjars/**"
                         ).permitAll()
-                        .requestMatchers("/api/auth/**","/api/odsay/transit",
-                                "/api/tmap/transit","api/tmap/transit/filter","api/ai/recommend","api/tmap/transit/preferred","api/similar")
+                        .requestMatchers("/api/auth/**",
+                                "/api/tmap/transit","api/tmap/transit/filter","api/ai/recommend","api/similar")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
