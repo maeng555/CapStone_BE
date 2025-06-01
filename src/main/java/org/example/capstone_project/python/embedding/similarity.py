@@ -7,7 +7,7 @@ from openai import OpenAI
 import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="")
 
 def get_embedding(text, model="text-embedding-3-small"):
     return client.embeddings.create(input = [text], model=model).data[0].embedding
