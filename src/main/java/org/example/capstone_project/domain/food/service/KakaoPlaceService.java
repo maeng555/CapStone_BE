@@ -29,7 +29,7 @@ public class KakaoPlaceService {
                         .queryParam("category_group_code", categoryCode)
                         .queryParam("x", x)
                         .queryParam("y", y)
-                        .queryParam("radius", 2000)
+                        //.queryParam("radius", 2000)
                         .queryParam("sort", "accuracy")
                         .build())
                 .retrieve()

@@ -53,7 +53,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/api/auth/**",
                                 "/api/tmap/transit","api/tmap/transit/filter","api/ai/recommend","api/similar","api/places",
-                                "api/places/restaurant","api/places/bar","api/places/cafe","api/places/all")
+                                "api/places/restaurant","api/places/bar","api/places/cafe","api/places/all","/api/recommend/**")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
