@@ -8,4 +8,6 @@ public class KakaoPlaceResponse {
     private String x;
     private String y;
     private String addressName; // 추가
+
+
 }

@@ -33,8 +33,16 @@ public class UserService {
             throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
         }
         System.out.println("📌 register: DB 저장 시도 중"); // 로그
-        User user = new User(null, request.getNickname(), request.getAge(), passwordEncoder.encode(request.getPassword()),null, new ArrayList<>());
-        userRepository.save(user);
+        User user = new User(
+                null,
+                request.getNickname(),
+                request.getAge(),
+                passwordEncoder.encode(request.getPassword()),
+                null, // refreshToken
+                new ArrayList<>(), // preferences
+                new ArrayList<>(), // favorites
+                new ArrayList<>()  // searchKeywords
+        );        userRepository.save(user);
     }
 
     public LoginResponse login(LoginRequest request) {

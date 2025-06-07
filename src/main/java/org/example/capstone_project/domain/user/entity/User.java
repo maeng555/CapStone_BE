@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.capstone_project.domain.food.entity.Favorite;
+import org.example.capstone_project.domain.food.entity.UserSearchKeyword;
 import org.example.capstone_project.domain.preference.entity.UserCategoryPreference;
 
 import java.util.ArrayList;
@@ -35,5 +37,10 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCategoryPreference> preferences = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Favorite> favorites = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserSearchKeyword> keywords = new ArrayList<>();
 
 }
