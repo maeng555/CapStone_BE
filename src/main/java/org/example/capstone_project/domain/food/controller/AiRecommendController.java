@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.example.capstone_project.domain.food.PythonRun;
 import org.example.capstone_project.domain.food.dto.KakaoPlaceResponse;
+import org.example.capstone_project.domain.food.dto.UserSearchKeywordRequest;
 import org.example.capstone_project.domain.food.service.KakaoPlaceService;
 import org.example.capstone_project.domain.food.service.UserSearchKeywordService;
 import org.example.capstone_project.domain.user.entity.User;
@@ -37,21 +38,21 @@ public class AiRecommendController {
         return "FD6"; // 기본: 음식점
     }
 
-    @Operation(summary = "키워드 기반 맛집 검색 (자동 카테고리)", description = "사용자가 검색한 키워드와 위치를 기반으로 카카오 API에서 맛집을 검색하고, 키워드를 저장합니다.")
     @PostMapping("/search")
     public ResponseEntity<List<KakaoPlaceResponse>> searchPlacesByKeyword(
             @RequestHeader("Authorization") String token,
-            @RequestParam String keyword,
+            @RequestBody UserSearchKeywordRequest keywordRequest,
             @RequestParam double x,
             @RequestParam double y
     ) {
         String pureToken = token.replace("Bearer ", "");
         User user = userService.getUserFromToken(pureToken);
 
-        keywordService.saveKeyword(user, keyword);
+        // ✅ ID는 절대 사용하지 않고 keyword만 저장
+        keywordService.saveKeyword(user, keywordRequest.getKeyword());
 
-        String categoryCode = determineCategoryCode(keyword);
-        List<KakaoPlaceResponse> places = kakaoPlaceService.searchPlaces(keyword, categoryCode, x, y);
+        String categoryCode = determineCategoryCode(keywordRequest.getKeyword());
+        List<KakaoPlaceResponse> places = kakaoPlaceService.searchPlaces(keywordRequest.getKeyword(), categoryCode, x, y);
 
         if (places.isEmpty()) {
             return ResponseEntity.noContent().build();
