@@ -26,4 +26,9 @@ public class UserSearchKeyword {
 
     @Column(nullable = false)
     private LocalDateTime searchedAt = LocalDateTime.now();
+
+    @PrePersist
+    protected void onCreate() {
+        this.searchedAt = LocalDateTime.now();
+    }
 }

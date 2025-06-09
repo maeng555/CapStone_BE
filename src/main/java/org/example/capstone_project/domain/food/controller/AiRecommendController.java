@@ -67,7 +67,7 @@ public class AiRecommendController {
             @RequestHeader("Authorization") String token,
             @RequestParam double x,
             @RequestParam double y
-    ) {
+    ) throws IOException {
         String pureToken = token.replace("Bearer ", "");
         User user = userService.getUserFromToken(pureToken);
 

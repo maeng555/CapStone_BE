@@ -18,6 +18,6 @@ public interface UserSearchKeywordRepository extends JpaRepository<UserSearchKey
             "WHERE k.user = :user " +
             "GROUP BY k.keyword " +
             "HAVING COUNT(k) >= 2 " +
-            "ORDER BY cnt DESC")
+            "ORDER BY MAX(k.searchedAt) DESC")
     List<Object[]> findFrequentKeywordsByUser(@Param("user") User user);
 }

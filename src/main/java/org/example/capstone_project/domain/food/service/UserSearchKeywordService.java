@@ -6,6 +6,7 @@ import org.example.capstone_project.domain.food.repository.UserSearchKeywordRepo
 import org.example.capstone_project.domain.user.entity.User;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -19,6 +20,7 @@ public class UserSearchKeywordService {
         UserSearchKeyword entry = new UserSearchKeyword();
         entry.setUser(user);
         entry.setKeyword(keyword);
+        entry.setSearchedAt(LocalDateTime.now());
         keywordRepository.save(entry);
     }
 
