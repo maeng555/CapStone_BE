@@ -24,18 +24,18 @@ public class AiRecommendController {
     private final UserSearchKeywordService keywordService;
     private final UserService userService;
 
-    // ✅ 자동 분류 기준 키워드 목록
+
     private static final Set<String> CAFE_KEYWORDS = Set.of(
             "카페", "커피", "아메리카노", "스타벅스", "이디야", "투썸", "메가커피", "빽다방", "할리스", "폴바셋"
     );
 
-    // ✅ 키워드를 보고 category_code 결정
+
     private String determineCategoryCode(String keyword) {
         String lower = keyword.toLowerCase();
         for (String cafe : CAFE_KEYWORDS) {
-            if (lower.contains(cafe)) return "CE7"; // 카페
+            if (lower.contains(cafe)) return "CE7";
         }
-        return "FD6"; // 기본: 음식점
+        return "FD6";
     }
 
     @PostMapping("/search")
@@ -48,7 +48,7 @@ public class AiRecommendController {
         String pureToken = token.replace("Bearer ", "");
         User user = userService.getUserFromToken(pureToken);
 
-        // ✅ ID는 절대 사용하지 않고 keyword만 저장
+
         keywordService.saveKeyword(user, keywordRequest.getKeyword());
 
         String categoryCode = determineCategoryCode(keywordRequest.getKeyword());

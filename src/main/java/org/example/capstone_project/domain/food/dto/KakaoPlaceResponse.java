@@ -7,7 +7,7 @@ public class KakaoPlaceResponse {
     private String placeUrl;
     private String x;
     private String y;
-    private String addressName; // 추가
+    private String addressName;
 
 
 }
