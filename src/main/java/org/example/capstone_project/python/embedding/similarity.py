@@ -3,17 +3,19 @@ import json
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from openai import OpenAI
+import os
 
-import io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-
-client = OpenAI(api_key="")
+client = OpenAI(api_key="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")  # 그대로 둬도 됨
 
 def get_embedding(text, model="text-embedding-3-small"):
     return client.embeddings.create(input = [text], model=model).data[0].embedding
 
 def similar_food(target):
-    with open("/Users/maengjin-yeong/Documents/capstone_project/capstone_project/src/main/java/org/example/capstone_project/python/embedding/food_embeddings.json", "r", encoding="utf-8") as f:
+    json_path = os.getenv("FOOD_EMBEDDING_JSON")
+    if not json_path:
+        raise ValueError("환경변수 'FOOD_EMBEDDING_JSON'이 설정되지 않았습니다.")
+
+    with open(json_path, "r", encoding="utf-8") as f:
         loaded_dict = json.load(f)
 
     if target in loaded_dict:
@@ -29,12 +31,11 @@ def similar_food(target):
         similarity = cosine_similarity(target_vector, vector)[0][0]
         similarities[food] = similarity
 
-    most_similar_food = max(similarities, key=similarities.get)
     similarity_list = sorted(similarities.items(), key=lambda x: x[1], reverse=True)[:3]
 
     result = {
-        "most_similar_food": most_similar_food,
-        "similarity": round(similarities[most_similar_food], 4),
+        "most_similar_food": similarity_list[0][0],
+        "similarity": round(similarity_list[0][1], 4),
         "top3": [{ "food": food, "similarity": round(sim, 4) } for food, sim in similarity_list],
         "top3_names": ", ".join([food for food, _ in similarity_list])
     }
