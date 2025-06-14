@@ -15,7 +15,7 @@ public class UserSearchKeywordService {
 
     private final UserSearchKeywordRepository keywordRepository;
 
-    // ✅ 키워드 저장
+
     public void saveKeyword(User user, String keyword) {
         UserSearchKeyword entry = new UserSearchKeyword();
         entry.setUser(user);
@@ -24,12 +24,7 @@ public class UserSearchKeywordService {
         keywordRepository.save(entry);
     }
 
-    // ✅ 해당 키워드를 2번 이상 검색했는지 여부
-    public boolean isFrequentKeyword(User user, String keyword) {
-        return keywordRepository.findByUserAndKeyword(user, keyword).size() >= 2;
-    }
 
-    // ✅ 유저가 2번 이상 검색한 키워드 목록
     public List<Object[]> getFrequentKeywords(User user) {
         return keywordRepository.findFrequentKeywordsByUser(user);
     }

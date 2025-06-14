@@ -50,10 +50,9 @@ public class KakaoPlaceService {
                 .collect(Collectors.toList());
     }
 
-
     @Data
-    private static class KakaoRawResponse {
-        private List<Document> documents;
+    public static class KakaoRawResponse {
+        private List<KakaoPlaceService.KakaoRawResponse.Document> documents;
 
         @Data
         static class Document {
@@ -73,4 +72,6 @@ public class KakaoPlaceService {
             private String addressName;
         }
     }
+
+
 }
