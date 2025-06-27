@@ -66,9 +66,8 @@
 
 | 길찾기 기능 | 장소 추천 기능 |
 |:--:|:--:|
-| <img src="https://github.com/user-attachments/assets/이미지1링크" width="400"/> | <img src="https://github.com/user-attachments/assets/이미지2링크" width="400"/> |
+| <img src="https://github.com/user-attachments/assets/ee654617-6d47-46f0-b09d-3b092bb8254e" width="300" /> | <img src="https://github.com/user-attachments/assets/9796a6f2-93fc-4e56-b6de-b4aa46a1a4e8" width="400" /> |
 | **선호 경로 자동 추천** <br/> Tmap 기반 실시간 경로 탐색 + 사용자 선택 이력 기반 추천 | **유사 키워드 음식점 추천** <br/> 입력 키워드와 유사도 높은 장소 추천 (OpenAI Embedding + Kakao Local API) |
-
 ---
 
 ## <span id="4">🔍 상세 기능</span>
@@ -76,7 +75,7 @@
 ### 🧭 길찾기 기능
 - 실시간 경로 탐색 (Tmap API 기반)
 - 사용자 경로 선택 이력 저장 및 학습
-- 상태전이확률 기반 선호 경로 자동 추천
+- 선호 경로 자동 추천
 - 교통수단 별 클릭 빈도 기반 자동 필터링
 
 ### 🍜 장소 추천 기능
@@ -85,10 +84,11 @@
 - 카카오 Local API 연동 결과 제공
 
 ### 🧠 시스템 구조
-- API 서버: Spring Boot + MySQL
-- 프론트엔드: Next.js + TailwindCSS + Zustand
-- 서버 배포: Docker + Nginx + EC2
+- 백엔드: Spring Boot + MySQL
+- 프론트엔드: React + TailwindCSS + Zustand
+- 서버 배포: Nginx + EC2
 - GPT API: OpenAI Embedding 활용 (Python → Java 연동)
+- 외부 API: Kakao API + TMAP API
 
 ---
 
